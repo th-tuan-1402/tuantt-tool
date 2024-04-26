@@ -1,4 +1,5 @@
 import createTTSClient, { FILE_EXT, OUTPUT_FORMAT, TTSMetaData } from "~/scripts/services/tts";
+import path from 'path'
 
 export default defineEventHandler(async (event) => {
     const { input: txtInp } = await readBody(event);
@@ -19,7 +20,7 @@ async function handleConvert(txtInp: string) {
     let tts = createTTSClient({ metadata })
     let fileExt = FILE_EXT.MP3;
     let fileName = getFileName("sound") + "." + fileExt;
-    let filePath = "./public/output/tts/" + fileName;
+    let filePath = path.join(process.cwd(), 'public/output/tts/' + fileName);
 
     let outputPath = await tts.convertToSound(txtInp, filePath);
     if (outputPath) {
