@@ -3,6 +3,9 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineNuxtConfig({
   //...
+  css: [
+    '~/assets/css/global.css',
+  ],
   build: {
     transpile: ['vuetify'],
   },
@@ -31,5 +34,11 @@ export default defineNuxtConfig({
         // ]
       }
     )]
-  }
+  },
+  postcss: {
+    plugins: {
+      tailwindcss: {},
+      autoprefixer: {},
+    },
+  },
 })
