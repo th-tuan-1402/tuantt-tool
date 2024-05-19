@@ -1,6 +1,4 @@
-import videojs, { type ReadyCallback } from "video.js";
-
-export default function useVideo(id: string, options: MaybeRef<any>, callBack: ReadyCallback) {
+export default function useVideo(id: string, options: MaybeRef<any>, callBack) {
   let defaultOptions = {
     "techOrder": [
       "Html5"

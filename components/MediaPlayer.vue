@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import useVideo from "~/composables/video";
+import useVideo from '~/composables/video';
 
 type MediaSource = {
   src: string;
@@ -19,6 +19,16 @@ export default {
         return {};
       },
     },
+  },
+  setup(props) {
+    useHead({
+      script: [
+        {
+          src: "https://cdn.jsdelivr.net/npm/video.js@8.12.0/dist/video.min.js",
+          tagPosition: "head"
+        },
+      ],
+    });
   },
   data() {
     return {
@@ -60,5 +70,5 @@ export default {
 };
 </script>
 <style lang="css">
-@import url("https://unpkg.com/video.js/dist/video-js.css");
+@import url("https://cdn.jsdelivr.net/npm/video.js@8.12.0/dist/video-js.min.css");
 </style>
