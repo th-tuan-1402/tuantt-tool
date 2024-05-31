@@ -23,7 +23,7 @@ export class TTSClient {
   private tts: MsEdgeTTS;
 
   constructor({ metadata }: { metadata: TTSMetaData }) {
-    this.tts = new MsEdgeTTS();
+    this.tts = new MsEdgeTTS(null, false);
 
     const { voiceName, outputFormat, voiceLocale } = metadata;
     this.tts.setMetadata(voiceName, outputFormat, voiceLocale);
@@ -43,6 +43,21 @@ export class TTSClient {
     }
 
     return path;
+  }
+
+  async convertToStream(input: string) {
+    let readable = null;
+
+    try {
+      readable = await this.tts.toStream(
+        input,
+        OPTION_VOICE_DOC_TRUYEN
+      );
+    } catch (e) {
+      console.error(e);
+    }
+
+    return readable;
   }
 }
 
