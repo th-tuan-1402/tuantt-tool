@@ -5,46 +5,19 @@ export default defineEventHandler(async (event) => {
     let result = null;
 
     if (txtInp) {
-        result = await handleConvert(txtInp);
+        result = await convert(txtInp);
     }
 
-    return { data: result };
+    return result;
 })
 
-async function handleConvert(txtInp: string) {
+async function convert(txtInp: string) {
     let metadata: TTSMetaData = {
         voiceName: "vi-VN-HoaiMyNeural",
         outputFormat: OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3
     }
     let tts = createTTSClient({ metadata })
-    let fileExt = FILE_EXT.MP3;
-    let fileName = getFileName("sound") + "." + fileExt;
-    let filePath = "./public/output/tts/" + fileName;
+    let output = await tts.convertToStream(txtInp);
 
-    let outputPath = await tts.convertToSound(txtInp, filePath);
-    if (outputPath) {
-        outputPath = outputPath.replace('./public', '');
-    }
-
-    return outputPath;
-}
-
-function getFileName(fileName: string): string {
-    // Format the timestamp (YYYYMMDD_HHMMSS)
-    const timestamp = getCurrentTimestamp();
-
-    // Append timestamp to the file name
-    const namedFile = `${fileName}_${timestamp}`;
-
-    return namedFile;
-}
-
-function getCurrentTimestamp() {
-    const now = new Date();
-    return `${padZero(now.getHours())}${padZero(now.getMinutes())}${padZero(now.getSeconds())}`;
-}
-
-// Helper function to pad single digit numbers with a leading zero
-function padZero(num: number): string {
-    return num.toString().padStart(2, "0");
+    return output;
 }
