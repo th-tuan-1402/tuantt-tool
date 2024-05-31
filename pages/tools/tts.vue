@@ -1,5 +1,5 @@
 <template>
-  <v-card class="pa-2 w-50 mx-auto" :disabled="isProcessing">
+  <v-card class="pa-2 w-full md:w-1/2 mx-auto" :disabled="isProcessing">
     <v-progress-circular
       :size="50"
       color="primary"
