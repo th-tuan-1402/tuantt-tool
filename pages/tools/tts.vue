@@ -35,7 +35,7 @@ export default {
       txtInp: null,
       isProcessing: false,
       downloadUrl: null,
-      fileName: "output.mp3",
+      fileName: "output",
     };
   },
   computed: {
