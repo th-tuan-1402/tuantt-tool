@@ -10,17 +10,16 @@
       <v-textarea label="Text to convert" v-model="txtInp"></v-textarea>
       <v-btn color="primary" @click="onConvert">Convert</v-btn>
     </v-card-text>
-    <v-card-text v-if="filePath">
+    <v-card-text v-if="downloadUrl">
       <v-text-field
         label="File name"
-        v-model="filePath"
-        readonly
+        v-model="fileName"
         @change="onChangeTextInput"
       ></v-text-field>
       <v-btn
         color="green"
         class="ml"
-        :href="filePath"
+        :href="downloadUrl"
         :download="downloadFileName"
         target="_blank"
         >Download</v-btn
@@ -35,39 +34,66 @@ export default {
       filePath: null,
       txtInp: null,
       isProcessing: false,
+      downloadUrl: null,
+      fileName: "output",
     };
   },
   computed: {
     disableDownloadButton() {
-      return !!this.filePath;
+      return !!this.downloadUrl;
     },
     downloadFileName() {
-      return this.filePath.split("/").pop();
+      const timestamp = new Date().getTime();
+      return `${this.fileName}_${timestamp}.mp3`;
     },
   },
   methods: {
     onChangeTextInput() {
-      this.filePath = "";
+      this.downloadUrl = null;
     },
     async onConvert() {
-      this.filePath = null;
+      this.downloadUrl = null;
 
       this.isProcessing = true;
       {
-        try {
-          let { data: fileName } = await $fetch("/api/tts", {
-            method: "post",
-            body: {
-              input: this.txtInp,
-            },
-          });
-
-          this.filePath = fileName;
-        } catch (e) {
-          console.error(e);
+        let dataObj = await this.convert();
+        if (dataObj) {
+          // Convert chunks to a single Blob
+          let blob = new Blob(dataObj, { type: "audio/mpeg" });
+          this.downloadUrl = URL.createObjectURL(blob); // for steam data
         }
       }
       this.isProcessing = false;
+    },
+
+    // private function
+    async convert() {
+      let blobData = null;
+
+      try {
+        let response = await $fetch("/api/tts", {
+          method: "post",
+          body: {
+            input: this.txtInp,
+          },
+          responseType: "stream",
+        });
+
+        // Read chunks data from stream
+        const reader = response.getReader();
+        const chunks = [];
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+        }
+
+        blobData = chunks;
+      } catch (e) {
+        console.error(e);
+      }
+
+      return blobData;
     },
   },
 };
