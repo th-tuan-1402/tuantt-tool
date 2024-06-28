@@ -109,13 +109,12 @@ export default {
     // private function
     async convert() {
       let blobData = null;
+      let input = this.escapeXml(this.txtInp);
 
       try {
         let response = await $fetch("/api/tts", {
           method: "post",
-          body: {
-            input: this.txtInp,
-          },
+          body: { input },
           responseType: "stream",
         });
 
@@ -134,6 +133,20 @@ export default {
       }
 
       return blobData;
+    },
+
+    /**
+     * Escape unsafe xml characters
+     * @param string unsafe
+     * @returns string safe string
+     */
+    escapeXml(unsafe) {
+      return unsafe
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     },
   },
 };
