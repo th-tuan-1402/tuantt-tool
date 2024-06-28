@@ -13,10 +13,8 @@
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
-    <v-card-text v-if="downloadUrl" class="d-flex justify-center">
-      <audio controls>
-        <source :src="downloadUrl" type="audio/mpeg" />
-      </audio>
+    <v-card-text v-if="audioSrc" class="d-flex justify-center">
+      <audio controls autoplay @ended="onEndPlayAudio" :src="audioSrc"></audio>
     </v-card-text>
     <v-card-text>
       <v-textarea
@@ -42,11 +40,10 @@
           </svg>
         </v-btn>
         <v-btn
+          :disabled="disableDownloadButton"
+          @click="onDownLoadAudio"
           color="green"
           class="ml"
-          :href="downloadUrl"
-          :download="downloadFileName"
-          target="_blank"
           ><svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -74,33 +71,55 @@ export default {
       filePath: null,
       txtInp: null,
       isProcessing: false,
-      downloadUrl: null,
       fileName: "output",
+      audioSources: [],
+      currentAudioIndex: -1,
     };
   },
   computed: {
     disableDownloadButton() {
-      return !!this.downloadUrl;
+      return !!this.audioSources;
     },
     downloadFileName() {
       const timestamp = new Date().getTime();
       return `${this.fileName}_${timestamp}.mp3`;
     },
+    audioSrc() {
+      let src = null;
+      if (this.audioSources) {
+        src = this.audioSources[this.currentAudioIndex];
+      }
+
+      return src;
+    },
   },
   methods: {
+    onDownLoadAudio() {
+      const timestamp = new Date().getTime();
+      for (let index = 0; index < this.audioSources.length; index++) {
+        let aTag = document.createElement("a");
+        aTag.href = this.audioSources[index];
+        aTag.download = `${this.fileName}_${timestamp}_${index}.mp3`;
+        aTag.target = "_blank";
+        aTag.click();
+      }
+    },
+    onEndPlayAudio() {
+      this.currentAudioIndex +=
+        this.currentAudioIndex + 1 < this.audioSources.length ? 1 : 0;
+    },
     onChangeTextInput() {
-      this.downloadUrl = null;
+      this.audioSources = [];
     },
     async onConvert() {
-      this.downloadUrl = null;
-
       this.isProcessing = true;
       {
         let dataObj = await this.convert();
         if (dataObj) {
-          // Convert chunks to a single Blob
-          let blob = new Blob(dataObj, { type: "audio/mpeg" });
-          this.downloadUrl = URL.createObjectURL(blob); // for steam data
+          this.audioSources = dataObj.map((blobData) => {
+            return URL.createObjectURL(new Blob(blobData, { type: "audio/mpeg" }));
+          });
+          this.currentAudioIndex = this.audioSources ? 0 : -1;
         }
       }
       this.isProcessing = false;
@@ -108,31 +127,34 @@ export default {
 
     // private function
     async convert() {
-      let blobData = null;
-      let input = this.escapeXml(this.txtInp);
+      let blobData = [];
+      let paragraphs = this.splitIntoChunkWordCount(this.txtInp, 500);
+      let input = null;
 
       try {
-        let response = await $fetch("/api/tts", {
-          method: "post",
-          body: { input },
-          responseType: "stream",
-        });
+        for (let i = 0; i < paragraphs.length; i++) {
+          input = this.escapeXml(paragraphs[i]);
+          let response = await $fetch("/api/tts", {
+            method: "post",
+            body: { input },
+            responseType: "stream",
+          });
 
-        // Read chunks data from stream
-        const reader = response.getReader();
-        const chunks = [];
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          chunks.push(value);
+          // Read chunks data from stream
+          const reader = response.getReader();
+          const chunks = [];
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            chunks.push(value);
+          }
+          blobData.push(chunks);
         }
-
-        blobData = chunks;
       } catch (e) {
         console.error(e);
       }
 
-      return blobData;
+      return blobData ?? null;
     },
 
     /**
@@ -147,6 +169,45 @@ export default {
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
+    },
+
+    /**
+     * Split text into smaller size chunk
+     * @param string text
+     * @param int maxWords
+     * @returns string[] chunks
+     */
+    splitIntoChunkWordCount(text, maxWords = 2000) {
+      // Split the text into sentences
+      const sentences = text.match(/[^\.!\?]+[\.!\?]+/g);
+      if (!sentences) return [];
+
+      let paragraphs = [];
+      let currentParagraph = "";
+      let currentWordCount = 0;
+
+      sentences.forEach((sentence) => {
+        const wordCount = sentence.split(/\s+/).length;
+
+        // If adding the current sentence would exceed the word limit
+        if (currentWordCount + wordCount > maxWords) {
+          // End the current paragraph and start a new one
+          paragraphs.push(currentParagraph.trim());
+          currentParagraph = "";
+          currentWordCount = 0;
+        }
+
+        // Add the sentence to the current paragraph
+        currentParagraph += sentence + " ";
+        currentWordCount += wordCount;
+      });
+
+      // Add the last paragraph if there is any content left
+      if (currentParagraph.trim()) {
+        paragraphs.push(currentParagraph.trim());
+      }
+
+      return paragraphs;
     },
   },
 };
