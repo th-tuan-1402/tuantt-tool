@@ -74,6 +74,9 @@ export default {
       fileName: "output",
       audioSources: [],
       currentAudioIndex: -1,
+      constants: {
+        MAX_WORD_COUNT_PER_REQUEST: 2000,
+      },
     };
   },
   computed: {
@@ -128,7 +131,10 @@ export default {
     // private function
     async convert() {
       let blobData = [];
-      let paragraphs = this.splitIntoChunkWordCount(this.txtInp, 500);
+      let paragraphs = this.splitIntoChunkWordCount(
+        this.txtInp,
+        this.constants.MAX_WORD_COUNT_PER_REQUEST
+      );
       let input = null;
 
       try {
