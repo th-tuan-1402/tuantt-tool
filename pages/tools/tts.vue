@@ -9,11 +9,7 @@
     <v-expansion-panels>
       <v-expansion-panel title="⚙️">
         <v-expansion-panel-text>
-          <v-text-field
-            label="File name"
-            v-model="fileName"
-            @change="onChangeTextInput"
-          ></v-text-field>
+          <v-text-field label="File name" v-model="fileName"></v-text-field>
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
