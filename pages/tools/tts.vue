@@ -1,11 +1,5 @@
 <template>
-  <v-card class="pa-2 w-full md:w-1/2 mx-auto" :disabled="isProcessing">
-    <v-progress-circular
-      :size="50"
-      color="primary"
-      indeterminate
-      v-show="isProcessing"
-    ></v-progress-circular>
+  <v-card class="pa-2 w-full md:w-1/2 mx-auto">
     <v-expansion-panels>
       <v-expansion-panel title="⚙️">
         <v-expansion-panel-text>
@@ -13,17 +7,47 @@
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
-    <v-card-text v-if="audioSrc" class="d-flex justify-center">
+    <v-card-text v-if="audioSrc" class="d-flex justify-center items-center flex-col">
+      <div>
+        <v-btn
+          class="audio_track__control_button"
+          variant="text"
+          @click="previousAudioTrack"
+          @keyup.left="previousAudioTrack"
+          >⏮️</v-btn
+        >
+        <div class="py-3 px-2 inline-block">
+          {{ currentAudioIndex + 1 + "/" + audioSources.length }}
+        </div>
+        <v-btn
+          class="audio_track__control_button"
+          variant="text"
+          @keyup.right="nextAudioTrack"
+          @click="nextAudioTrack"
+          >⏭️</v-btn
+        >
+      </div>
       <audio controls autoplay @ended="onEndPlayAudio" :src="audioSrc"></audio>
     </v-card-text>
     <v-card-text>
+      <v-progress-circular
+        :size="50"
+        color="primary"
+        indeterminate
+        v-show="isProcessing"
+      ></v-progress-circular>
+      <div class="d-flex flex-row-reverse">
+        <span>{{ wordCount }} words, {{ characterCount }} chars</span>
+      </div>
       <v-textarea
         label="Text to convert"
         v-model="txtInp"
         @change="onChangeTextInput"
+        :disabled="isProcessing"
       ></v-textarea>
+
       <div class="d-flex gap-x-1">
-        <v-btn color="primary" @click="onConvert"
+        <v-btn color="primary" @click="onConvert" :disabled="isProcessing"
           ><svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -80,7 +104,20 @@ export default {
     };
   },
   computed: {
+    characterCount() {
+      return this.txtInp ? this.txtInp.length : 0;
+    },
+    wordCount() {
+      if (!this.txtInp) {
+        return 0;
+      }
+
+      return this.txtInp.split(/\s/).filter((str) => str.trim().length > 0).length;
+    },
     disableDownloadButton() {
+      if (this.isProcessing) {
+        return true;
+      }
       return this.audioSources.length == 0;
     },
     downloadFileName() {
@@ -108,8 +145,7 @@ export default {
       }
     },
     onEndPlayAudio() {
-      this.currentAudioIndex +=
-        this.currentAudioIndex + 1 < this.audioSources.length ? 1 : 0;
+      this.nextAudioTrack();
     },
     onChangeTextInput() {
       this.audioSources = [];
@@ -117,52 +153,62 @@ export default {
     async onConvert() {
       this.isProcessing = true;
       {
-        let dataObj = await this.convert();
-        if (dataObj) {
-          this.audioSources = dataObj.map((blobData) => {
-            return URL.createObjectURL(new Blob(blobData, { type: "audio/mpeg" }));
-          });
-          this.currentAudioIndex = this.audioSources ? 0 : -1;
+        // Clear audio sources
+        this.audioSources = [];
+
+        // Call api to convert text to audio
+        let paragraphs = this.splitIntoChunkWordCount(
+          this.txtInp,
+          this.constants.MAX_WORD_COUNT_PER_REQUEST
+        );
+        for (let i = 0; i < paragraphs.length; i++) {
+          let dataObj = await this.convert(this.escapeXml(paragraphs[i]));
+          if (dataObj) {
+            let blobUrl = URL.createObjectURL(new Blob(dataObj, { type: "audio/mpeg" }));
+            this.audioSources.push(blobUrl);
+
+            // Update current index to first
+            if (i == 0) this.currentAudioIndex = 0;
+          }
         }
       }
       this.isProcessing = false;
     },
 
     // private function
-    async convert() {
-      let blobData = [];
-      let paragraphs = this.splitIntoChunkWordCount(
-        this.txtInp,
-        this.constants.MAX_WORD_COUNT_PER_REQUEST
-      );
-      let input = null;
+    async convert(input) {
+      let dataObj = null;
 
       try {
-        for (let i = 0; i < paragraphs.length; i++) {
-          input = this.escapeXml(paragraphs[i]);
-          let response = await $fetch("/api/tts", {
-            method: "post",
-            body: { input },
-            responseType: "stream",
-          });
+        let response = await $fetch("/api/tts", {
+          method: "post",
+          body: { input },
+          responseType: "stream",
+        });
 
-          // Read chunks data from stream
-          const reader = response.getReader();
-          const chunks = [];
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            chunks.push(value);
-          }
-          blobData.push(chunks);
+        // Read chunks data from stream
+        const reader = response.getReader();
+        const chunks = [];
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
         }
+
+        dataObj = chunks;
       } catch (e) {
         console.error(e);
       }
 
-      return blobData ?? null;
+      return dataObj;
     },
-
+    previousAudioTrack() {
+      this.currentAudioIndex += this.currentAudioIndex - 1 >= 0 ? -1 : 0;
+    },
+    nextAudioTrack() {
+      this.currentAudioIndex +=
+        this.currentAudioIndex + 1 < this.audioSources.length ? 1 : 0;
+    },
     /**
      * Escape unsafe xml characters
      * @param string unsafe
@@ -218,3 +264,9 @@ export default {
   },
 };
 </script>
+<style>
+.audio_track__control_button {
+  min-width: 0 !important;
+  padding: 0 8px !important;
+}
+</style>
