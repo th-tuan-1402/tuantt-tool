@@ -81,7 +81,7 @@ export default {
   },
   computed: {
     disableDownloadButton() {
-      return !!this.audioSources;
+      return this.audioSources.length == 0;
     },
     downloadFileName() {
       const timestamp = new Date().getTime();
@@ -99,10 +99,10 @@ export default {
   methods: {
     onDownLoadAudio() {
       const timestamp = new Date().getTime();
+      let aTag = document.createElement("a");
       for (let index = 0; index < this.audioSources.length; index++) {
-        let aTag = document.createElement("a");
         aTag.href = this.audioSources[index];
-        aTag.download = `${this.fileName}_${timestamp}_${index}.mp3`;
+        aTag.download = `${this.fileName}_${index}_${timestamp}.mp3`;
         aTag.target = "_blank";
         aTag.click();
       }
