@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- Textarea để dán HTML trực tiếp -->
+    <!-- Textarea để nhập hoặc dán HTML trực tiếp -->
     <textarea v-model="htmlInput" placeholder="Paste HTML here"></textarea>
 
     <!-- Nút chọn file để upload file HTML -->
@@ -9,6 +9,12 @@
     <!-- Nút chuyển đổi và link tải CSV -->
     <button @click="convertHtmlToCsv">Convert to CSV</button>
     <a :href="csvData" download="data.csv" v-if="csvData">Download CSV</a>
+
+    <!-- Phần hiển thị preview HTML đã nhập hoặc tải lên -->
+    <div v-if="htmlInput" class="preview-container">
+      <h3>HTML Preview</h3>
+      <div v-html="htmlInput" class="html-preview"></div>
+    </div>
   </div>
 </template>
 
@@ -16,8 +22,8 @@
 export default {
   data() {
     return {
-      htmlInput: '', // nơi lưu mã HTML nhập trực tiếp hoặc từ file
-      csvData: null, // nơi lưu kết quả CSV
+      htmlInput: '', // Nơi lưu mã HTML nhập trực tiếp hoặc từ file
+      csvData: null, // Nơi lưu kết quả CSV
     };
   },
   methods: {
@@ -59,5 +65,14 @@ textarea {
   width: 100%;
   height: 150px;
   margin-bottom: 10px;
+}
+.preview-container {
+  margin-top: 20px;
+}
+.html-preview {
+  border: 1px solid #ccc;
+  padding: 10px;
+  max-height: 300px;
+  overflow-y: auto;
 }
 </style>
