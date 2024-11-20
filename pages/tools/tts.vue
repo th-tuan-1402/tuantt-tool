@@ -99,7 +99,7 @@ export default {
       audioSources: [],
       currentAudioIndex: -1,
       constants: {
-        MAX_WORD_COUNT_PER_REQUEST: 2000,
+        MAX_WORD_COUNT_PER_REQUEST: 1900,
       },
     };
   },
