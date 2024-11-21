@@ -2,7 +2,6 @@ import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineNuxtConfig({
-  //...
   css: [
     '~/assets/css/global.css',
   ],
@@ -16,7 +15,7 @@ export default defineNuxtConfig({
         config.plugins.push(vuetify({ autoImport: true }))
       })
     },
-    //...
+    'nuxt-vue3-google-signin'
   ],
   vite: {
     vue: {
@@ -24,21 +23,15 @@ export default defineNuxtConfig({
         transformAssetUrls,
       },
     },
-    plugins: [nodePolyfills(
-      {
-        // include: [
-        //   'crypto',
-        //   'stream',
-        //   'process',
-        //   'child_process'
-        // ]
-      }
-    )]
+    plugins: [nodePolyfills({})]
   },
   postcss: {
     plugins: {
       tailwindcss: {},
       autoprefixer: {},
     },
+  },
+  googleSignIn: {
+    clientId: '928727516902-gott01vfnpbm8mvs5bu1vob93mgb8a4k.apps.googleusercontent.com',
   },
 })
