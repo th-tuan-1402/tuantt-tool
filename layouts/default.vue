@@ -3,12 +3,8 @@
   <slot v-else />
 </template>
 
-<script lang="ts">
-export default {
-  computed: {
-    isLoggedIn() {
-      return false;
-    },
-  },
-};
+<script lang="ts" setup>
+import { useAuthStorage } from "~/scripts/store.ts";
+
+const { isLoggedIn } = useAuthStorage();
 </script>

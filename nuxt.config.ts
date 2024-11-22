@@ -9,13 +9,14 @@ export default defineNuxtConfig({
     transpile: ['vuetify'],
   },
   modules: [
+    'nuxt-vue3-google-signin',
+    '@vueuse/nuxt',
     (_options, nuxt) => {
       nuxt.hooks.hook('vite:extendConfig', (config) => {
         // @ts-expect-error
         config.plugins.push(vuetify({ autoImport: true }))
       })
-    },
-    'nuxt-vue3-google-signin'
+    }
   ],
   vite: {
     vue: {
