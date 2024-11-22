@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {GoogleSignInButton, type CredentialResponse, decodeCredential} from "vue3-google-signin";
-import {useAuthStorage} from "~/scripts/store.ts"
+import {useAuthStorage} from "~/composables/store.ts"
 
-const { isLoggedIn, setLoggedId, setUser } = useAuthStorage();
+const { isLoggedIn, setLoggedIn, setUser } = useAuthStorage();
 
 // handle success event
 const handleLoginSuccess = (response: CredentialResponse) => {
@@ -10,9 +10,11 @@ const handleLoginSuccess = (response: CredentialResponse) => {
   const decodedCredential = decodeCredential(credential);
 
   if (decodedCredential !== null) {
-    setLoggedId(true);
+    setLoggedIn(true);
     setUser(decodedCredential);
   }
+
+  navigateTo("/");
 };
 
 // handle an error event
