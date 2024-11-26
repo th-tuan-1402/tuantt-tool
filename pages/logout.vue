@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" setup>
 import { useAuthStorage } from "~/composables/store";
 
 if (process.client) {
