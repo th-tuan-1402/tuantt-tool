@@ -28,12 +28,35 @@ export type TTSMetaData = {
 
 export class TTSClient {
   private tts: MsEdgeTTS;
+  private rate: RATE;
+  private pitch: PITCH;
+  private volume: VOLUME;
 
   constructor({ metadata }: { metadata: TTSMetaData }) {
     this.tts = new MsEdgeTTS(null, false);
 
     const { voiceName, outputFormat, voiceLocale } = metadata;
     this.tts.setMetadata(voiceName, outputFormat, voiceLocale);
+  }
+
+  getOption(): TTS_VOICE_OPTION {
+    return {
+      rate: this.rate,
+      pitch: this.pitch,
+      volume: this.volume
+    }
+  }
+
+  setRate(rate: RATE) {
+    this.rate = rate;
+  }
+
+  setPitch(pitch: PITCH) {
+    this.pitch = pitch;
+  }
+
+  setVolume(volume: VOLUME) {
+    this.volume = volume;
   }
 
   async convertToSound(input: string, filePath: string) {
@@ -67,8 +90,9 @@ export class TTSClient {
     return readable;
   }
 
-  async getSoundAsStream(input: string, option: TTS_VOICE_OPTION) {
+  async getSoundAsStream(input: string) {
     let readable = null;
+    let option: TTS_VOICE_OPTION = this.getOption();
 
     try {
       readable = await this.tts.toStream(input, option);
@@ -79,8 +103,9 @@ export class TTSClient {
     return readable;
   }
 
-  async getSoundAsFile(input: string, filePath: string, option: TTS_VOICE_OPTION) {
+  async getSoundAsFile(input: string, filePath: string) {
     let path = null;
+    let option: TTS_VOICE_OPTION = this.getOption();
 
     try {
       path = await this.tts.toFile(filePath, input, option);
@@ -94,5 +119,14 @@ export class TTSClient {
 
 export function createTTSClient(options: { metadata: TTSMetaData }) {
   const tts = new TTSClient(options);
+  return tts;
+}
+
+export function useTTS(voiceName: string, outputFormat: OUTPUT_FORMAT, rate: RATE, pitch: PITCH, volume: VOLUME) {
+  const tts = new TTSClient({ metadata: { voiceName, outputFormat } });
+  tts.setRate(rate);
+  tts.setPitch(pitch);
+  tts.setVolume(volume);
+
   return tts;
 }
