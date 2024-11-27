@@ -1,5 +1,3 @@
-import createTTSClient, { FILE_EXT, OUTPUT_FORMAT, TTSMetaData } from "~/scripts/services/tts";
-
 export default defineEventHandler(async (event) => {
     const { input: txtInp } = await readBody(event);
     let result = null;

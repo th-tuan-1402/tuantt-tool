@@ -1,10 +1,17 @@
 import { MsEdgeTTS, OUTPUT_FORMAT, PITCH, RATE, VOLUME } from 'msedge-tts';
 
+export type TTS_VOICE_OPTION = {
+  rate: RATE,
+  pitch: PITCH,
+  volume: VOLUME
+}
+
 const FILE_EXT = {
   WEBM: 'webm',
   MP3: 'mp3',
 };
-const OPTION_VOICE_DOC_TRUYEN = {
+
+const OPTION_VOICE_DOC_TRUYEN: TTS_VOICE_OPTION = {
   rate: RATE.FAST,
   pitch: PITCH.DEFAULT,
   volume: VOLUME.DEFAULT,
@@ -59,9 +66,33 @@ export class TTSClient {
 
     return readable;
   }
+
+  async getSoundAsStream(input: string, option: TTS_VOICE_OPTION) {
+    let readable = null;
+
+    try {
+      readable = await this.tts.toStream(input, option);
+    } catch (e) {
+      console.error(e);
+    }
+
+    return readable;
+  }
+
+  async getSoundAsFile(input: string, filePath: string, option: TTS_VOICE_OPTION) {
+    let path = null;
+
+    try {
+      path = await this.tts.toFile(filePath, input, option);
+    } catch (e) {
+      console.error(e);
+    }
+
+    return path;
+  }
 }
 
-export default function createTTSClient(options: { metadata: TTSMetaData }) {
+export function createTTSClient(options: { metadata: TTSMetaData }) {
   const tts = new TTSClient(options);
   return tts;
 }
