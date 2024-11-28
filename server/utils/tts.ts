@@ -6,69 +6,82 @@ export type TTS_VOICE_OPTION = {
   volume: VOLUME
 }
 
-const FILE_EXT = {
+export type TTS_VOICE_PROFILE = {
+  voiceName: string,
+  outputFormat: OUTPUT_FORMAT
+  voiceLocale?: string
+}
+
+export const DEFAULT_VOICE_PROFILE: TTS_VOICE_PROFILE = {
+  voiceName: "vi-VN-HoaiMyNeural",
+  outputFormat: OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3,
+  voiceLocale: "vi-VN"
+}
+
+export const DEFAULT_VOICE_OPTION: TTS_VOICE_OPTION = {
+  rate: RATE.DEFAULT,
+  pitch: PITCH.DEFAULT,
+  volume: VOLUME.DEFAULT,
+};
+
+export const FILE_EXT = {
   WEBM: 'webm',
   MP3: 'mp3',
 };
 
-const OPTION_VOICE_DOC_TRUYEN: TTS_VOICE_OPTION = {
+export const OPTION_VOICE_DOC_TRUYEN: TTS_VOICE_OPTION = {
   rate: RATE.FAST,
   pitch: PITCH.DEFAULT,
   volume: VOLUME.DEFAULT,
 };
 
 export { OUTPUT_FORMAT, PITCH, RATE, VOLUME }
-export { FILE_EXT, OPTION_VOICE_DOC_TRUYEN }
-
-export type TTSMetaData = {
-  voiceName: string,
-  outputFormat: OUTPUT_FORMAT,
-  voiceLocale?: string
-}
 
 export class TTSClient {
   private tts: MsEdgeTTS;
+  private rate: RATE;
+  private pitch: PITCH;
+  private volume: VOLUME;
 
-  constructor({ metadata }: { metadata: TTSMetaData }) {
+  constructor(profile: TTS_VOICE_PROFILE, option?: TTS_VOICE_OPTION) {
     this.tts = new MsEdgeTTS(null, false);
-
-    const { voiceName, outputFormat, voiceLocale } = metadata;
-    this.tts.setMetadata(voiceName, outputFormat, voiceLocale);
+    this.setVoiceProfile(profile);
+    this.setVoiceOption(option ?? DEFAULT_VOICE_OPTION);
   }
 
-  async convertToSound(input: string, filePath: string) {
-    let path = null;
-
-    try {
-      path = await this.tts.toFile(
-        filePath,
-        input,
-        OPTION_VOICE_DOC_TRUYEN
-      );
-    } catch (e) {
-      console.error(e);
+  getOption(): TTS_VOICE_OPTION {
+    return {
+      rate: this.rate,
+      pitch: this.pitch,
+      volume: this.volume
     }
-
-    return path;
   }
 
-  async convertToStream(input: string) {
-    let readable = null;
-
-    try {
-      readable = await this.tts.toStream(
-        input,
-        OPTION_VOICE_DOC_TRUYEN
-      );
-    } catch (e) {
-      console.error(e);
-    }
-
-    return readable;
+  setRate(rate: RATE) {
+    this.rate = rate;
   }
 
-  async getSoundAsStream(input: string, option: TTS_VOICE_OPTION) {
+  setPitch(pitch: PITCH) {
+    this.pitch = pitch;
+  }
+
+  setVolume(volume: VOLUME) {
+    this.volume = volume;
+  }
+
+  setVoiceOption(option: TTS_VOICE_OPTION) {
+    this.rate = option.rate;
+    this.pitch = option.pitch;
+    this.volume = option.volume;
+  }
+
+  setVoiceProfile(profile: TTS_VOICE_PROFILE) {
+    this.tts.setMetadata(profile.voiceName, profile.outputFormat, profile.voiceLocale);
+  }
+
+  async getSoundAsStream(input: string) {
     let readable = null;
+    let option: TTS_VOICE_OPTION = this.getOption();
 
     try {
       readable = await this.tts.toStream(input, option);
@@ -79,8 +92,9 @@ export class TTSClient {
     return readable;
   }
 
-  async getSoundAsFile(input: string, filePath: string, option: TTS_VOICE_OPTION) {
+  async getSoundAsFile(input: string, filePath: string) {
     let path = null;
+    let option: TTS_VOICE_OPTION = this.getOption();
 
     try {
       path = await this.tts.toFile(filePath, input, option);
@@ -92,7 +106,6 @@ export class TTSClient {
   }
 }
 
-export function createTTSClient(options: { metadata: TTSMetaData }) {
-  const tts = new TTSClient(options);
-  return tts;
+export function useTTS(profile: TTS_VOICE_PROFILE, option: TTS_VOICE_OPTION) {
+  return new TTSClient(profile, option);
 }

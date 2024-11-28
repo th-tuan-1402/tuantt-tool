@@ -1,21 +1,62 @@
-export default defineEventHandler(async (event) => {
-    const { input: txtInp } = await readBody(event);
-    let result = null;
+/**
+ * Extracts parameters from the request.
+ *
+ * @param H3Event<EvenHandlerRequest> event
+ * @returns {Promise<{
+ *   input: string,
+ *   profile: TTS_VOICE_PROFILE,
+ *   option: TTS_VOICE_OPTION
+ * }>} Resolves with the parameters.
+ */
+async function getParam(event) {
+  const { input, rate, pitch, volume, voiceName, outputFormat } = await readBody(event);
 
-    if (txtInp) {
-        result = await convert(txtInp);
+  return {
+    input: input,
+    profile: {
+      voiceName: voiceName || DEFAULT_VOICE_PROFILE.voiceName,
+      outputFormat: outputFormat || DEFAULT_VOICE_PROFILE.outputFormat
+    },
+    option: {
+      rate: rate || DEFAULT_VOICE_OPTION.rate,
+      pitch: pitch || DEFAULT_VOICE_OPTION.pitch,
+      volume: volume || DEFAULT_VOICE_OPTION.volume
     }
-
-    return result;
-})
-
-async function convert(txtInp: string) {
-    let metadata: TTSMetaData = {
-        voiceName: "vi-VN-HoaiMyNeural",
-        outputFormat: OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3
-    }
-    let tts = createTTSClient({ metadata })
-    let output = await tts.convertToStream(txtInp);
-
-    return output;
+  }
 }
+
+/**
+ * Checks if the given parameters are valid.
+ *
+ * @param {{input: string, profile: TTS_VOICE_PROFILE, option: TTS_VOICE_OPTION}} param
+ * @returns {boolean} Resolves with true if the parameters are valid.
+ */
+function isValidParams(param): boolean {
+  // Todo: Add more validation
+  return true;
+}
+
+export default defineEventHandler(async (event) => {
+  let param = await getParam(event);
+
+  // Check if params are valid
+  if (isValidParams(param) === false) {
+    // Invalid params
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Invalid params'
+    })
+  }
+
+  // Convert text to audio
+  let result = null;
+  try {
+    let tts = useTTS(param.profile, param.option);
+    result = await tts.getSoundAsStream(param.input);
+
+  } catch (e) {
+    console.error(e);
+  }
+
+  return result;
+})
