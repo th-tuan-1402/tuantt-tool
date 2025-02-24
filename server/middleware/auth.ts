@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 export default defineEventHandler((event) => {
   const url = event.node.req.url
 
-  if (url !== '/api/auth/login') {
+  if (isProtectedUrl(url)) {
     const {authorization} =  event.node.req.headers
     const secret = process.env.NUXT_JWT_SECRET
     let isAuthenticated = false
@@ -25,3 +25,7 @@ export default defineEventHandler((event) => {
     }
   }
 })
+
+function isProtectedUrl(url?: string) {
+  return url?.startsWith('/api') && url !== '/api/auth/login'
+}
