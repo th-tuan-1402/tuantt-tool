@@ -16,7 +16,22 @@ export default defineNuxtConfig({
         config.plugins.push(vuetify({ autoImport: true }))
       })
     },
-    //...
+    [
+      'nuxt-openapi-docs-module',
+      {
+        folder: './docs',
+        name: 'APIs doc',
+        files: function() {
+          return { 
+            'tts': 'Text to speech'
+          }
+        },
+        debug: true,
+        list: true,
+        locales: ['en'],
+        footer: '© 2024 TUANTT. All rights reserved.'
+      }
+    ]
   ],
   vite: {
     vue: {
@@ -24,16 +39,7 @@ export default defineNuxtConfig({
         transformAssetUrls,
       },
     },
-    plugins: [nodePolyfills(
-      {
-        // include: [
-        //   'crypto',
-        //   'stream',
-        //   'process',
-        //   'child_process'
-        // ]
-      }
-    )]
+    plugins: [nodePolyfills({})]
   },
   postcss: {
     plugins: {

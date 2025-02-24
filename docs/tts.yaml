@@ -1,0 +1,35 @@
+openapi: 3.0.0
+info:
+  description: Microsoft edge TTS wrapper API
+  version: 1.0.0
+  title: Microsoft edge TTS
+  contact:
+    email: tuan.140296@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+tags:
+  - name: converter
+    description: Convert text to audio
+    externalDocs:
+      description: Find out more
+      url: http://swagger.io
+paths:
+  /tts:
+    summary: Convert text to audio
+    post:
+      summary: convert text to audio
+      description: ''
+      operationId: tts_convert
+      responses:
+        default:
+          description: Default error sample response
+          content:
+            application/json:
+              examples:
+                '200':
+                  value: |-
+                    {
+                      "status": 200,
+                      "message: "OK"
+                    }
