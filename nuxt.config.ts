@@ -5,9 +5,11 @@ export default defineNuxtConfig({
   css: [
     '~/assets/css/global.css',
   ],
+
   build: {
     transpile: ['vuetify'],
   },
+
   modules: [
     'nuxt-vue3-google-signin',
     '@vueuse/nuxt',
@@ -18,6 +20,7 @@ export default defineNuxtConfig({
       })
     }
   ],
+
   vite: {
     vue: {
       template: {
@@ -26,13 +29,17 @@ export default defineNuxtConfig({
     },
     plugins: [nodePolyfills({})]
   },
+
   postcss: {
     plugins: {
       tailwindcss: {},
       autoprefixer: {},
     },
   },
+
   googleSignIn: {
-    clientId: '928727516902-gott01vfnpbm8mvs5bu1vob93mgb8a4k.apps.googleusercontent.com',
+    clientId: process.env.GOOGLE_CLIENT_ID,
   },
+
+  compatibilityDate: '2025-02-24',
 })
