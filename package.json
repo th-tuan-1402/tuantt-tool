@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
+    "jsonwebtoken": "^9.0.2",
     "msedge-tts": "^1.3.4",
     "nuxt": "^3.14.1592",
     "vue": "^3.4.21",
