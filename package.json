@@ -12,19 +12,19 @@
   "dependencies": {
     "@mdi/font": "^7.4.47",
     "msedge-tts": "^1.3.4",
-    "nuxt": "^3.11.2",
+    "nuxt": "^3.14.1592",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.5.0"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.19",
-    "postcss": "^8.4.38",
-    "sass": "^1.77.6",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "sass": "^1.82.0",
     "sass-loader": "^14.2.1",
-    "tailwindcss": "^3.4.3",
-    "video.js": "^8.12.0",
+    "tailwindcss": "^3.4.16",
+    "video.js": "^8.20.0",
     "vite-plugin-node-polyfills": "^0.21.0",
-    "vite-plugin-vuetify": "^2.0.3",
-    "vuetify": "^3.5.17"
+    "vite-plugin-vuetify": "^2.0.4",
+    "vuetify": "^3.7.5"
   }
 }
