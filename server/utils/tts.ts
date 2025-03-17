@@ -43,10 +43,8 @@ export class TTSClient {
   private pitch: PITCH;
   private volume: VOLUME;
 
-  constructor(profile: TTS_VOICE_PROFILE, option?: TTS_VOICE_OPTION) {
+  constructor() {
     this.tts = new MsEdgeTTS(null, false);
-    this.setVoiceProfile(profile);
-    this.setVoiceOption(option ?? DEFAULT_VOICE_OPTION);
   }
 
   getOption(): TTS_VOICE_OPTION {
@@ -107,5 +105,7 @@ export class TTSClient {
 }
 
 export function useTTS(profile: TTS_VOICE_PROFILE, option: TTS_VOICE_OPTION) {
-  return new TTSClient(profile, option);
+  let tts = new TTSClient();
+  tts.setVoiceProfile(profile);
+  tts.setVoiceOption(option ?? DEFAULT_VOICE_OPTION);
 }
