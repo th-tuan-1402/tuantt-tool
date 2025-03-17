@@ -50,3 +50,11 @@ export function escapeXml(unsafe: string) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
+
+export function getWordCount(text: string|undefined): number {
+  if (!text) {
+    return 0;
+  }
+
+  return text.trim().split(/\s+/).length;
+}

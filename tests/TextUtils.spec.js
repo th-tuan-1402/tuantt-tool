@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { splitIntoChunkWordCount, escapeXml } from '~/scripts/utils/TextUtils'
+import { splitIntoChunkWordCount, escapeXml, getWordCount } from '~/scripts/utils/TextUtils'
 
 describe('splitIntoChunkWordCount', () => {
   it('returns empty array for empty text', () => {
@@ -81,3 +81,31 @@ describe('escapeXml function', () => {
     expect(result).toBe("Hello &#039; World")
   })
 })
+
+describe('getWordCount function', () => {
+  it('returns 0 for empty string', () => {
+    expect(getWordCount('')).toBe(0);
+  });
+
+  it('returns 0 for null or undefined input', () => {
+    expect(getWordCount(null)).toBe(0);
+    expect(getWordCount(undefined)).toBe(0);
+  });
+
+  it('returns 1 for single word', () => {
+    expect(getWordCount('hello')).toBe(1);
+  });
+
+  it('returns correct count for multiple words', () => {
+    expect(getWordCount('hello world')).toBe(2);
+    expect(getWordCount('hello world this is a test')).toBe(6);
+  });
+
+  it('ignores multiple spaces in between words', () => {
+    expect(getWordCount('hello   world')).toBe(2);
+  });
+
+  it('ignores leading or trailing spaces', () => {
+    expect(getWordCount('   hello world   ')).toBe(2);
+  });
+});

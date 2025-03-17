@@ -89,7 +89,7 @@
   </v-card>
 </template>
 <script>
-import { splitIntoChunkWordCount, escapeXml } from "~/scripts/utils/TextUtils";
+import { splitIntoChunkWordCount, escapeXml, getWordCount } from "~/scripts/utils/TextUtils";
 
 export default {
   data() {
@@ -114,7 +114,7 @@ export default {
         return 0;
       }
 
-      return this.txtInp.split(/\s/).filter((str) => str.trim().length > 0).length;
+      return getWordCount(this.txtInp);
     },
     disableDownloadButton() {
       if (this.isProcessing) {
