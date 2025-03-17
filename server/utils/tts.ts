@@ -102,10 +102,12 @@ export class TTSClient {
 
     return path;
   }
+
+  async getVoiceList() {
+    return this.tts.getVoices();
+  }
 }
 
-export function useTTS(profile: TTS_VOICE_PROFILE, option: TTS_VOICE_OPTION) {
-  let tts = new TTSClient();
-  tts.setVoiceProfile(profile);
-  tts.setVoiceOption(option ?? DEFAULT_VOICE_OPTION);
+export function useTTS() {
+  return new TTSClient();
 }

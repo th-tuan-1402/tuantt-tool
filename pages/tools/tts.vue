@@ -4,6 +4,9 @@
       <v-expansion-panel title="⚙️">
         <v-expansion-panel-text>
           <v-text-field label="File name" v-model="fileName"></v-text-field>
+          <v-select label="Locale" v-model="locale" :items="localeSelectionList" multiple></v-select>
+          <v-select label="Gender" v-model="gender" :items="genderSelectionList" multiple></v-select>
+          <v-select label="Voice" v-model="voice" :items="voices"></v-select>
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -103,9 +106,57 @@ export default {
       constants: {
         MAX_WORD_COUNT_PER_REQUEST: 1900,
       },
+      genderSelectionList: ["Male", "Female"],
+      locale: null,
+      gender: null,
+      voice: null,
     };
   },
+  async asyncData() {
+    const data = await $fetch('/api/tts')
+
+    return {
+      test: "abc",
+      voiceList: data.voiceList
+    }
+  },
+  // async asyncData({isDev, route, store, env, params, query, req, res, redirect, error}) {
+  //   const data = await $fetch("/api/tts");
+  //   console.warn(data);
+    
+
+  //   if (!data) {
+  //     error({ statusCode: 500, message: "Failed to fetch voices" });
+  //   }
+
+  //   return data;
+  // },  
   computed: {
+    voices() {
+      // Filter voice list with locale and gender
+      return this.voiceList.filter((voice) => {
+        if (this.locale && !this.locale !== voice.locale) {
+          return false;
+        }
+
+        if (this.gender && this.gender != voice.gender) {
+          return false;
+        }
+
+        return true;
+      });
+    },
+    localeSelectionList() {
+      let localeSelectionList = [];
+      for (let i = 0; i < this.voiceList.length; i++) {
+        if (!localeSelectionList.includes(this.voiceList[i].locale)) {
+          localeSelectionList.push(this.voiceList[i].locale);
+        }
+      }
+
+      return localeSelectionList;
+    },
+
     characterCount() {
       return this.txtInp ? this.txtInp.length : 0;
     },

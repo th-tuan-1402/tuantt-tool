@@ -51,7 +51,10 @@ export default defineEventHandler(async (event) => {
   // Convert text to audio
   let result = null;
   try {
-    let tts = useTTS(param.profile, param.option);
+    let tts = useTTS();
+    tts.setVoiceProfile(param.profile);
+    tts.setVoiceOption(param.option ?? DEFAULT_VOICE_OPTION);
+
     result = await tts.getSoundAsStream(param.input);
 
   } catch (e) {
