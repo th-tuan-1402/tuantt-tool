@@ -89,6 +89,8 @@
   </v-card>
 </template>
 <script>
+import { splitIntoChunkWordCount, escapeXml, getWordCount } from "~/scripts/utils/TextUtils";
+
 export default {
   data() {
     return {
@@ -112,7 +114,7 @@ export default {
         return 0;
       }
 
-      return this.txtInp.split(/\s/).filter((str) => str.trim().length > 0).length;
+      return getWordCount(this.txtInp);
     },
     disableDownloadButton() {
       if (this.isProcessing) {
@@ -157,12 +159,12 @@ export default {
         this.audioSources = [];
 
         // Call api to convert text to audio
-        let paragraphs = this.splitIntoChunkWordCount(
+        let paragraphs = splitIntoChunkWordCount(
           this.txtInp,
           this.constants.MAX_WORD_COUNT_PER_REQUEST
         );
         for (let i = 0; i < paragraphs.length; i++) {
-          let dataObj = await this.convert(this.escapeXml(paragraphs[i]));
+          let dataObj = await this.convert(escapeXml(paragraphs[i]));
           if (dataObj) {
             let blobUrl = URL.createObjectURL(new Blob(dataObj, { type: "audio/mpeg" }));
             this.audioSources.push(blobUrl);
@@ -208,58 +210,6 @@ export default {
     nextAudioTrack() {
       this.currentAudioIndex +=
         this.currentAudioIndex + 1 < this.audioSources.length ? 1 : 0;
-    },
-    /**
-     * Escape unsafe xml characters
-     * @param string unsafe
-     * @returns string safe string
-     */
-    escapeXml(unsafe) {
-      return unsafe
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    },
-
-    /**
-     * Split text into smaller size chunk
-     * @param string text
-     * @param int maxWords
-     * @returns string[] chunks
-     */
-    splitIntoChunkWordCount(text, maxWords = 2000) {
-      // Split the text into sentences
-      const sentences = text.match(/[^\.!\?]+[\.!\?]+/g);
-      if (!sentences) return [];
-
-      let paragraphs = [];
-      let currentParagraph = "";
-      let currentWordCount = 0;
-
-      sentences.forEach((sentence) => {
-        const wordCount = sentence.split(/\s+/).length;
-
-        // If adding the current sentence would exceed the word limit
-        if (currentWordCount + wordCount > maxWords) {
-          // End the current paragraph and start a new one
-          paragraphs.push(currentParagraph.trim());
-          currentParagraph = "";
-          currentWordCount = 0;
-        }
-
-        // Add the sentence to the current paragraph
-        currentParagraph += sentence + " ";
-        currentWordCount += wordCount;
-      });
-
-      // Add the last paragraph if there is any content left
-      if (currentParagraph.trim()) {
-        paragraphs.push(currentParagraph.trim());
-      }
-
-      return paragraphs;
     },
   },
 };
