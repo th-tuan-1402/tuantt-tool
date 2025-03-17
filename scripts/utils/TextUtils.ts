@@ -4,7 +4,7 @@
  * @param int maxWords
  * @returns string[] chunks
  */
-export function splitIntoChunkWordCount(text: string, maxWords = 2000) {
+export function splitIntoChunkWordCount(text: string, maxWords:number = 2000) {
   // Split the text into sentences
   const sentences = text.match(/[^\.!\?]+[\.!\?]*/g);
   if (!sentences) return [];
@@ -35,4 +35,18 @@ export function splitIntoChunkWordCount(text: string, maxWords = 2000) {
   }
 
   return paragraphs;
+}
+
+/**
+     * Escape unsafe xml characters
+     * @param string unsafe
+     * @returns string safe string
+     */
+export function escapeXml(unsafe: string) {
+  return unsafe
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }

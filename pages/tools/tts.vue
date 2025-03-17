@@ -89,7 +89,7 @@
   </v-card>
 </template>
 <script>
-import { splitIntoChunkWordCount } from "~/scripts/utils/TextUtils";
+import { splitIntoChunkWordCount, escapeXml } from "~/scripts/utils/TextUtils";
 
 export default {
   data() {
@@ -164,7 +164,7 @@ export default {
           this.constants.MAX_WORD_COUNT_PER_REQUEST
         );
         for (let i = 0; i < paragraphs.length; i++) {
-          let dataObj = await this.convert(this.escapeXml(paragraphs[i]));
+          let dataObj = await this.convert(escapeXml(paragraphs[i]));
           if (dataObj) {
             let blobUrl = URL.createObjectURL(new Blob(dataObj, { type: "audio/mpeg" }));
             this.audioSources.push(blobUrl);
@@ -210,19 +210,6 @@ export default {
     nextAudioTrack() {
       this.currentAudioIndex +=
         this.currentAudioIndex + 1 < this.audioSources.length ? 1 : 0;
-    },
-    /**
-     * Escape unsafe xml characters
-     * @param string unsafe
-     * @returns string safe string
-     */
-    escapeXml(unsafe) {
-      return unsafe
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
     },
   },
 };
