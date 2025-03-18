@@ -1,3 +1,5 @@
+import { useTTS, DEFAULT_VOICE_OPTION, DEFAULT_VOICE_PROFILE } from "~/server/utils/tts";
+
 /**
  * Extracts parameters from the request.
  *

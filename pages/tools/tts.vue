@@ -1,95 +1,127 @@
 <template>
-  <v-card class="pa-2 w-full md:w-1/2 mx-auto">
-    <v-expansion-panels>
+  <div class="pa-2 w-full md:w-1/2 mx-auto">
+    <v-card>
+      <v-card-text v-if="audioSrc" class="d-flex justify-center items-center flex-col">
+        <div>
+          <v-btn
+            class="audio_track__control_button"
+            variant="text"
+            @click="previousAudioTrack"
+            @keyup.left="previousAudioTrack"
+            >⏮️</v-btn
+          >
+          <div class="py-3 px-2 inline-block">
+            {{ currentAudioIndex + 1 + "/" + audioSources.length }}
+          </div>
+          <v-btn
+            class="audio_track__control_button"
+            variant="text"
+            @keyup.right="nextAudioTrack"
+            @click="nextAudioTrack"
+            >⏭️</v-btn
+          >
+        </div>
+        <audio controls autoplay @ended="onEndPlayAudio" :src="audioSrc"></audio>
+      </v-card-text>
+      <v-card-text>
+        <v-progress-circular
+          :size="50"
+          color="primary"
+          indeterminate
+          v-show="isProcessing"
+        ></v-progress-circular>
+        <div class="d-flex flex-row-reverse">
+          <span>{{ wordCount }} words, {{ characterCount }} chars</span>
+        </div>
+        <v-textarea
+          label="Text to convert"
+          v-model="txtInp"
+          @change="onChangeTextInput"
+          :disabled="isProcessing"
+        ></v-textarea>
+
+        <div class="d-flex gap-x-1">
+          <v-btn color="primary" @click="onConvert" :disabled="isProcessing"
+            ><svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="size-6"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
+              />
+            </svg>
+          </v-btn>
+          <v-btn
+            :disabled="disableDownloadButton"
+            @click="onDownLoadAudio"
+            color="green"
+            class="ml"
+            ><svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="size-6"
+              variant="text"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m-6 3.75 3 3m0 0 3-3m-3 3V1.5m6 9h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75"
+              />
+            </svg>
+          </v-btn>
+        </div>
+      </v-card-text>
+    </v-card>
+    <v-expansion-panels class="mt-4">
       <v-expansion-panel title="⚙️">
+        <v-card>
+          <v-card-text>
+            <v-text-field label="📎File name:" v-model="fileName" density="compact">
+          </v-text-field></v-card-text>
+          <v-card-text class="mt-2">
+            <div><span>🎙️ Voice</span></div>
+            <v-autocomplete label="Locale" v-model="locale" :items="localeSelectionList" item-title="text" item-value="value" clearable density="compact"></v-autocomplete>
+            <v-select label="Gender" v-model="gender" :items="genderSelectionList" clearable density="compact"></v-select>
+            <v-select label="Voice" v-model="voice" :items="voices" clearable item-title="FriendlyName" return-object density="compact"></v-select>
+          </v-card-text>
+          <v-card-text>
+            <v-slider v-model="option.rate"
+                      :min="optionRange.rate.min"
+                      :max="optionRange.rate.max"
+                      :step="optionRange.rate.step"
+                      prepend-icon="mdi-speedometer"
+                      density="compact"
+                      thumb-label 
+                      show-ticks>
+            </v-slider>
+            <v-slider v-model="option.volume"
+                      :min="optionRange.volume.min"
+                      :max="optionRange.volume.max"
+                      :step="optionRange.volume.step"
+                      prepend-icon="mdi-volume-high"
+                      density="compact"
+                      thumb-label
+                      show-ticks>
+            </v-slider>
+          </v-card-text>
+        </v-card>
+        <v-expansion-panel-text>aaaa</v-expansion-panel-text>
         <v-expansion-panel-text>
-          <v-text-field label="File name" v-model="fileName"></v-text-field>
-          <v-select label="Locale" v-model="locale" :items="localeSelectionList" multiple></v-select>
-          <v-select label="Gender" v-model="gender" :items="genderSelectionList" multiple></v-select>
-          <v-select label="Voice" v-model="voice" :items="voices"></v-select>
+          
+          
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
-    <v-card-text v-if="audioSrc" class="d-flex justify-center items-center flex-col">
-      <div>
-        <v-btn
-          class="audio_track__control_button"
-          variant="text"
-          @click="previousAudioTrack"
-          @keyup.left="previousAudioTrack"
-          >⏮️</v-btn
-        >
-        <div class="py-3 px-2 inline-block">
-          {{ currentAudioIndex + 1 + "/" + audioSources.length }}
-        </div>
-        <v-btn
-          class="audio_track__control_button"
-          variant="text"
-          @keyup.right="nextAudioTrack"
-          @click="nextAudioTrack"
-          >⏭️</v-btn
-        >
-      </div>
-      <audio controls autoplay @ended="onEndPlayAudio" :src="audioSrc"></audio>
-    </v-card-text>
-    <v-card-text>
-      <v-progress-circular
-        :size="50"
-        color="primary"
-        indeterminate
-        v-show="isProcessing"
-      ></v-progress-circular>
-      <div class="d-flex flex-row-reverse">
-        <span>{{ wordCount }} words, {{ characterCount }} chars</span>
-      </div>
-      <v-textarea
-        label="Text to convert"
-        v-model="txtInp"
-        @change="onChangeTextInput"
-        :disabled="isProcessing"
-      ></v-textarea>
-
-      <div class="d-flex gap-x-1">
-        <v-btn color="primary" @click="onConvert" :disabled="isProcessing"
-          ><svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            class="size-6"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
-            />
-          </svg>
-        </v-btn>
-        <v-btn
-          :disabled="disableDownloadButton"
-          @click="onDownLoadAudio"
-          color="green"
-          class="ml"
-          ><svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            class="size-6"
-            variant="text"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m-6 3.75 3 3m0 0 3-3m-3 3V1.5m6 9h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75"
-            />
-          </svg>
-        </v-btn>
-      </div>
-    </v-card-text>
-  </v-card>
+  </div>
 </template>
 <script>
 import { splitIntoChunkWordCount, escapeXml, getWordCount } from "~/scripts/utils/TextUtils";
@@ -110,53 +142,56 @@ export default {
       locale: null,
       gender: null,
       voice: null,
+      option: {
+        rate: 1.0,
+        pitch: 1.0,
+        volume: 100.0,
+      },
+      optionRange: {
+        rate: {
+          min: 0.5,
+          max: 2.0,
+          step: 0.1,
+        },
+        volume: {
+          min: 0.0,
+          max: 100.0,
+          step: 10,
+        },
+      }
     };
   },
-  async asyncData() {
-    const data = await $fetch('/api/tts')
+  async setup() {
+    const { data, status, error, refresh, clear } = await useFetch('/api/tts')
+
+    if (error.value) {
+      createError('Failed to fetch voice list')
+    }
+
+    const {voiceList, genderSelectionList, localeList, localeSelectionList} = data.value
 
     return {
-      test: "abc",
-      voiceList: data.voiceList
+      voiceList,
+      genderSelectionList,
+      localeList,
+      localeSelectionList
     }
   },
-  // async asyncData({isDev, route, store, env, params, query, req, res, redirect, error}) {
-  //   const data = await $fetch("/api/tts");
-  //   console.warn(data);
-    
-
-  //   if (!data) {
-  //     error({ statusCode: 500, message: "Failed to fetch voices" });
-  //   }
-
-  //   return data;
-  // },  
   computed: {
     voices() {
       // Filter voice list with locale and gender
       return this.voiceList.filter((voice) => {
-        if (this.locale && !this.locale !== voice.locale) {
+        if (this.locale && this.locale != voice.Locale) {
           return false;
         }
 
-        if (this.gender && this.gender != voice.gender) {
+        if (this.gender && this.gender != voice.Gender) {
           return false;
         }
 
         return true;
       });
     },
-    localeSelectionList() {
-      let localeSelectionList = [];
-      for (let i = 0; i < this.voiceList.length; i++) {
-        if (!localeSelectionList.includes(this.voiceList[i].locale)) {
-          localeSelectionList.push(this.voiceList[i].locale);
-        }
-      }
-
-      return localeSelectionList;
-    },
-
     characterCount() {
       return this.txtInp ? this.txtInp.length : 0;
     },
@@ -231,11 +266,14 @@ export default {
     // private function
     async convert(input) {
       let dataObj = null;
+      let voiceName = this.voice?.ShortName;
+      let outputFormat = this.voice?.SuggestedCodec
+      let { rate, volume } = this.option;
 
       try {
         let response = await $fetch("/api/tts", {
           method: "post",
-          body: { input },
+          body: { input, voiceName, outputFormat, rate, volume },
           responseType: "stream",
         });
 
