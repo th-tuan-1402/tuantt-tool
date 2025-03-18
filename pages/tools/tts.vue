@@ -81,46 +81,33 @@
         </div>
       </v-card-text>
     </v-card>
-    <v-expansion-panels class="mt-4">
-      <v-expansion-panel title="⚙️">
-        <v-card>
-          <v-card-text>
-            <v-text-field label="📎File name:" v-model="fileName" density="compact">
-          </v-text-field></v-card-text>
-          <v-card-text class="mt-2">
-            <div><span>🎙️ Voice</span></div>
-            <v-autocomplete label="Locale" v-model="locale" :items="localeSelectionList" item-title="text" item-value="value" clearable density="compact"></v-autocomplete>
-            <v-select label="Gender" v-model="gender" :items="genderSelectionList" clearable density="compact"></v-select>
-            <v-select label="Voice" v-model="voice" :items="voices" clearable item-title="FriendlyName" return-object density="compact"></v-select>
-          </v-card-text>
-          <v-card-text>
-            <v-slider v-model="option.rate"
-                      :min="optionRange.rate.min"
-                      :max="optionRange.rate.max"
-                      :step="optionRange.rate.step"
-                      prepend-icon="mdi-speedometer"
-                      density="compact"
-                      thumb-label 
-                      show-ticks>
-            </v-slider>
-            <v-slider v-model="option.volume"
-                      :min="optionRange.volume.min"
-                      :max="optionRange.volume.max"
-                      :step="optionRange.volume.step"
-                      prepend-icon="mdi-volume-high"
-                      density="compact"
-                      thumb-label
-                      show-ticks>
-            </v-slider>
-          </v-card-text>
-        </v-card>
-        <v-expansion-panel-text>aaaa</v-expansion-panel-text>
-        <v-expansion-panel-text>
-          
-          
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
+    <v-card class="mt-4">
+      <v-card-text>
+        <v-text-field v-model="fileName" density="compact" prepend-icon="mdi-file" variant="underlined"></v-text-field>
+        <v-autocomplete v-model="locale" :items="localeSelectionList" item-title="text" item-value="value" clearable density="compact" prepend-icon="mdi-web" variant="underlined"></v-autocomplete>
+        <v-select v-model="gender" :items="genderSelectionList" clearable density="compact" prepend-icon="mdi-gender-male-female" auto-select-first variant="underlined"></v-select>
+        <v-select v-model="voice" :items="voices" clearable item-title="FriendlyName" return-object density="compact" prepend-icon="mdi-microphone" auto-select-first variant="underlined"></v-select>
+        <v-slider v-model="option.rate"
+                  :min="optionRange.rate.min"
+                  :max="optionRange.rate.max"
+                  :step="optionRange.rate.step"
+                  class="-ml-2"
+                  prepend-icon="mdi-speedometer"
+                  density="compact"
+                  thumb-label 
+                  show-ticks>
+        </v-slider>
+        <v-slider v-model="option.volume"
+                  :min="optionRange.volume.min"
+                  :max="optionRange.volume.max"
+                  :step="optionRange.volume.step"
+                  prepend-icon="mdi-volume-high"
+                  density="compact"
+                  thumb-label
+                  show-ticks>
+        </v-slider>
+      </v-card-text>
+    </v-card>
   </div>
 </template>
 <script>
