@@ -58,3 +58,14 @@ export function getWordCount(text: string|undefined): number {
 
   return text.trim().split(/\s+/).length;
 }
+
+export function getSentenceCount(text: string|undefined): number {
+  if (!text) {
+    return 0;
+  }
+
+  const sentences = text.split(/[!?\.]/)
+                          .filter(sentence => sentence.trim().length > 0);
+
+  return sentences.length;
+}

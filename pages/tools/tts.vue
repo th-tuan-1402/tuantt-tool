@@ -34,7 +34,7 @@
           v-show="isProcessing"
         ></v-progress-circular>
         <div class="d-flex flex-row-reverse">
-          <span>{{ wordCount }} words, {{ characterCount }} chars</span>
+          <span>{{ sentenceCount }} sentences,  {{ wordCount }} words, {{ characterCount }} chars</span>
         </div>
         <v-textarea
           label="Text to convert"
@@ -114,7 +114,7 @@
   </div>
 </template>
 <script>
-import { splitIntoChunkWordCount, escapeXml, getWordCount } from "~/scripts/utils/TextUtils";
+import { splitIntoChunkWordCount, escapeXml, getWordCount, getSentenceCount } from "~/scripts/utils/TextUtils";
 
 export default {
   data() {
@@ -169,6 +169,9 @@ export default {
     }
   },
   computed: {
+    sentenceCount() {
+      return getSentenceCount(this.txtInp);
+    },
     voices() {
       // Filter voice list with locale and gender
       return this.voiceList.filter((voice) => {
