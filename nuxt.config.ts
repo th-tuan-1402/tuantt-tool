@@ -1,44 +1,38 @@
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
-import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineNuxtConfig({
   //...
   css: [
-    '~/assets/css/global.css',
+    '~/assets/css/global.css'
   ],
+
   build: {
-    transpile: ['vuetify'],
+    transpile: ['vuetify']
   },
+
   modules: [
     (_options, nuxt) => {
       nuxt.hooks.hook('vite:extendConfig', (config) => {
         // @ts-expect-error
         config.plugins.push(vuetify({ autoImport: true }))
       })
-    },
-    //...
+    }
   ],
+
   vite: {
     vue: {
       template: {
         transformAssetUrls,
       },
     },
-    plugins: [nodePolyfills(
-      {
-        // include: [
-        //   'crypto',
-        //   'stream',
-        //   'process',
-        //   'child_process'
-        // ]
-      }
-    )]
   },
+
   postcss: {
     plugins: {
       tailwindcss: {},
       autoprefixer: {},
     },
   },
+
+  compatibilityDate: '2025-03-18'
 })
