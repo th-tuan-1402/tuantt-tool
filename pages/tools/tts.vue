@@ -12,6 +12,9 @@
           >
           <div class="py-3 px-2 inline-block">
             {{ currentAudioIndex + 1 + "/" + audioSources.length }}
+            <v-button variant="text" @click="onReconvert(currentAudioIndex)">
+              <v-icon>mdi-repeat-variant</v-icon>
+            </v-button>
           </div>
           <v-btn
             class="audio_track__control_button"
@@ -21,7 +24,7 @@
             >⏭️</v-btn
           >
         </div>
-        <audio controls autoplay @ended="onEndPlayAudio" :src="audioSrc"></audio>
+        <audio controls autoplay @ended="onEndPlayAudio" :src="audioSrc" ref="audioPlayer"></audio>
       </v-card-text>
       <v-card-text>
         <v-progress-circular
@@ -121,6 +124,7 @@ export default {
       isProcessing: false,
       fileName: "output",
       audioSources: [],
+      paragraphs: [],
       currentAudioIndex: -1,
       constants: {
         MAX_WORD_COUNT_PER_REQUEST: 1900,
@@ -209,6 +213,19 @@ export default {
     },
   },
   methods: {
+    async onReconvert(audioIndex) {
+      this.$refs.audioPlayer.pause();
+      this.isProcessing = true;
+      {
+        let dataObj = await this.convert(escapeXml(this.paragraphs[audioIndex]));
+        if (dataObj) {
+          let blobUrl = URL.createObjectURL(new Blob(dataObj, { type: "audio/mpeg" }));
+          this.audioSources[audioIndex] = blobUrl;
+        }
+      }
+      this.isProcessing = false;
+      this.$refs.audioPlayer.play();
+    },
     onDownLoadAudio() {
       const timestamp = new Date().getTime();
       let aTag = document.createElement("a");
@@ -230,14 +247,15 @@ export default {
       {
         // Clear audio sources
         this.audioSources = [];
+        this.paragraphs = [];
 
         // Call api to convert text to audio
-        let paragraphs = splitIntoChunkWordCount(
+        this.paragraphs = splitIntoChunkWordCount(
           this.txtInp,
           this.constants.MAX_WORD_COUNT_PER_REQUEST
         );
-        for (let i = 0; i < paragraphs.length; i++) {
-          let dataObj = await this.convert(escapeXml(paragraphs[i]));
+        for (let i = 0; i < this.paragraphs.length; i++) {
+          let dataObj = await this.convert(escapeXml(this.paragraphs[i]));
           if (dataObj) {
             let blobUrl = URL.createObjectURL(new Blob(dataObj, { type: "audio/mpeg" }));
             this.audioSources.push(blobUrl);
@@ -254,7 +272,7 @@ export default {
     async convert(input) {
       let dataObj = null;
       let voiceName = this.voice?.ShortName;
-      let outputFormat = this.voice?.SuggestedCodec
+      let outputFormat = this.voice?.SuggestedCodec;
       let { rate, volume } = this.option;
 
       try {
