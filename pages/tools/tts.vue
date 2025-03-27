@@ -128,6 +128,9 @@ export default {
       currentAudioIndex: -1,
       constants: {
         MAX_WORD_COUNT_PER_REQUEST: 1900,
+        MINE_TYPE_MP3: "audio/mpeg",
+        MINE_TYPE_OGG: "audio/ogg",
+        MINE_TYPE_WAV: "audio/wav",
       },
       genderSelectionList: ["Male", "Female"],
       locale: null,
@@ -229,15 +232,10 @@ export default {
       this.isProcessing = false;
       this.$refs.audioPlayer.play();
     },
-    onDownLoadAudio() {
-      const timestamp = new Date().getTime();
-      let aTag = document.createElement("a");
-      for (let index = 0; index < this.audioSources.length; index++) {
-        aTag.href = this.audioSources[index];
-        aTag.download = `${this.fileName}_${index}_${timestamp}.mp3`;
-        aTag.target = "_blank";
-        aTag.click();
-      }
+    async onDownLoadAudio() {
+      let blobs = await this.$audioUtils.concat(this.audioSources)
+      const { url } = await this.$audioUtils.export(blobs, this.constants.MINE_TYPE_MP3);
+      this.download(url);
     },
     onEndPlayAudio() {
       this.nextAudioTrack();
@@ -308,6 +306,14 @@ export default {
       this.currentAudioIndex +=
         this.currentAudioIndex + 1 < this.audioSources.length ? 1 : 0;
     },
+    download(url) {
+      const aTag = document.createElement("a");
+      aTag.href = url;
+      aTag.download = this.downloadFileName;
+      aTag.target = "_blank";
+      aTag.click();
+      document.removeChild(aTag);
+    }
   },
 };
 </script>

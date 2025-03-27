@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
+    "crunker": "^2.4.0",
     "msedge-tts": "^1.3.4",
     "nuxt": "^3.14.1592",
     "vitest": "^3.0.8",
