@@ -19,4 +19,4 @@ class AudioUtils {
   }
 }
 
-export default new AudioUtils();
+export default AudioUtils;

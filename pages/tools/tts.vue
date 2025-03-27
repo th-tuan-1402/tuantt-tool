@@ -114,7 +114,6 @@
   </div>
 </template>
 <script>
-import audioUtils from '~/scripts/utils/AudioUtils'
 import { splitIntoChunkWordCount, escapeXml, getWordCount, getSentenceCount } from "~/scripts/utils/TextUtils";
 
 export default {
@@ -234,8 +233,8 @@ export default {
       this.$refs.audioPlayer.play();
     },
     async onDownLoadAudio() {
-      let blobs = await audioUtils.concat(this.audioSources)
-      const { url } = await audioUtils.export(blobs, this.constants.MINE_TYPE_MP3);
+      let blobs = await this.$audioUtils.concat(this.audioSources)
+      const { url } = await this.$audioUtils.export(blobs, this.constants.MINE_TYPE_MP3);
       this.download(url);
     },
     onEndPlayAudio() {
